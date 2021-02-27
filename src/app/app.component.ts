@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
+import {Map} from 'leaflet';
 
 @Component({
   selector: 'app-root',
@@ -6,5 +7,19 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  title = 'map';
+  // @ts-ignore
+  private map: Map;
+
+  // @ts-ignore
+  private zoom: number;
+
+  // tslint:disable-next-line:typedef
+  receiveMap(map: Map) {
+    this.map = map;
+  }
+
+// tslint:disable-next-line:typedef
+  receiveZoom(zoom: number) {
+    this.zoom = zoom;
+  }
 }

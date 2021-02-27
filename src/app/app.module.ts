@@ -3,14 +3,19 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { MapComponent } from './map/map.component';
+import {LeafletModule} from '@asymmetrik/ngx-leaflet';
+import { OsmMapComponent } from './osm-map/osm-map.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    OsmMapComponent
   ],
   imports: [
     BrowserModule,
-    AppRoutingModule
+    AppRoutingModule,
+    LeafletModule,
   ],
   providers: [],
   bootstrap: [AppComponent]
