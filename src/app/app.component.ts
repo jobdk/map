@@ -1,25 +1,140 @@
-import {Component} from '@angular/core';
-import {Map} from 'leaflet';
+import { Component, OnInit, AfterViewInit, ViewChild } from '@angular/core';
+// @ts-ignore
+import {Map, Control, DomUtil, MapOptions, tileLayer, latLng, FullscreenOptions, SidebarOptions, marker, icon, LocationEvent} from 'leaflet';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
+import {NgxSidebarControlComponent} from '@runette/ngx-leaflet-sidebar'
+
 
 @Component({
-  selector: 'app-root',
+  selector: 'my-app',
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })
-export class AppComponent {
-  // @ts-ignore
-  private map: Map;
+export class AppComponent implements OnInit, AfterViewInit {
+  //string holds the display version of the location
+  public location = 'No Data';
 
-  // @ts-ignore
-  private zoom: number;
+  //flags for whether the controls should be present
+  public fsControlForm = new FormControl;
+  public fsControl: Boolean | undefined;
+  public locControlForm = new FormControl;
+  public locControl: Boolean | undefined;
 
-  // tslint:disable-next-line:typedef
-  receiveMap(map: Map) {
-    this.map = map;
+  //map variables
+  private map: Map[] = [];
+  private zoom: number[] = [];
+
+  //sidebar variables
+  public showLegend: boolean | undefined;
+  public legendUrl: SafeResourceUrl | undefined;
+  private panelContent: Control.PanelOptions = {
+    id: 'text',
+    tab: '<i class="material-icons" title="text">description</i>',
+    position: 'top',
+    title: 'Marker Info',
+    pane: ''
+  };
+
+  //map option object
+  private markerIcon = icon({
+    iconSize: [12, 21],
+    iconAnchor: [6, 21],
+    iconUrl: 'https://unpkg.com/leaflet@1.6.0/dist/images/marker-icon.png',
+    shadowSize: [12, 21],
+    shadowAnchor: [6, 21],
+    shadowUrl: 'https://unpkg.com/leaflet@1.6.0/dist/images/marker-shadow.png'
+  });
+  private map1Options: MapOptions = {
+    layers: [
+      tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        opacity: 0.7,
+        maxZoom: 19,
+        detectRetina: true,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }),
+      tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        detectRetina: true,
+        attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors | Map style: &copy; <a href="https://www.OpenRailwayMap.org">OpenRailwayMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+      })
+    ],
+    zoom: 1,
+    center: latLng(51, 0)
+  };
+
+  //control option objects
+  // @ts-ignore
+  public locateOptions: Control.LocateOptions = {
+    flyTo: false,
+    keepCurrentZoomLevel: true,
+    locateOptions: {
+      enableHighAccuracy: true,
+    },
+    icon: 'material-icons md-18 target icon',
+    clickBehavior: {
+      inView: 'stop',
+      outOfView: 'setView',
+      inViewNotFollowing: 'setView'
+    }
+  };
+  private fullscreenOptions: FullscreenOptions = {
+    position: 'topleft',
+    pseudoFullscreen: false,
+    title: {
+      true: 'Exit Fullscreen',
+      false: 'View Fullscreen',
+    }
+  };
+  public sidebarOptions: SidebarOptions = {
+    position: 'right',
+    autopan: true,
+    closeButton: true,
+    container: 'sidebar',
+  };
+
+  @ViewChild(NgxSidebarControlComponent, {static: false}) sidebar: NgxSidebarControlComponent | undefined;
+
+  constructor(private sanitizer: DomSanitizer) {
+  };
+
+  ngOnInit() {
   }
 
-// tslint:disable-next-line:typedef
-  receiveZoom(zoom: number) {
-    this.zoom = zoom;
+  ngAfterViewInit() {
+    // set up listeners for the switches
+    this.fsControlForm.valueChanges.subscribe(data => {
+      this.fsControl = data;
+    });
+    this.locControlForm.valueChanges.subscribe(data => {
+      this.locControl = data;
+    });
+  }
+
+  receiveMap(map: Map, id: number) {
+    this.map[id] = map;
+    marker(latLng(51, 0), {icon: this.markerIcon, title: 'United Kingdom'}).addTo(map).on('click', this.onClick, this);
+    marker(latLng(51, -80), {icon: this.markerIcon, title: 'Canada'}).addTo(map).on('click', this.onClick, this);
+  }
+
+  receiveZoom(zoom: number, id: number) {
+    this.zoom[id] = zoom;
+    this.showLegend = false;
+    this.legendUrl = this.sanitizer.bypassSecurityTrustResourceUrl(`https://www.openrailwaymap.org/api/legend-generator.php?zoom=${zoom}&style=standard&lang=en_GB`);
+    this.showLegend = true;
+  }
+
+  onNewLocation(location: LocationEvent) {
+    this.location = location.latlng.toString();
+  }
+
+  onClick(data: any) {
+    const sidebar = this.sidebar?.sidebar;
+    sidebar?.removePanel('text');
+    let title = data.target.options.title;
+    let panelHtml = `<h1>${title}</h1><p>Some text for ${title}</p>`;
+    this.panelContent.pane = panelHtml;
+    sidebar?.addPanel(this.panelContent);
+    sidebar?.open('text');
   }
 }

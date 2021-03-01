@@ -1,23 +1,30 @@
-import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
-
-import { AppRoutingModule } from './app-routing.module';
+import { BrowserModule } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
+import { LeafletModule} from '@asymmetrik/ngx-leaflet';
+import { OsmMapComponent} from "./osm-map/osm-map.component";
 import { AppComponent } from './app.component';
-import { MapComponent } from './map/map.component';
-import {LeafletModule} from '@asymmetrik/ngx-leaflet';
-import { OsmMapComponent } from './osm-map/osm-map.component';
+import {NgxLeafletFullscreenModule} from '@runette/ngx-leaflet-fullscreen';
+import {NgxLoadingControlModule} from '@runette/ngx-leaflet-loading';
+import {NgxLeafletLocateModule} from '@runette/ngx-leaflet-locate';
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
+import {MatGridListModule} from '@angular/material/grid-list';
+import { NgxSidebarControlModule } from '@runette/ngx-leaflet-sidebar';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @NgModule({
   declarations: [
     AppComponent,
     OsmMapComponent
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    LeafletModule,
+  imports: [BrowserModule, FormsModule, ReactiveFormsModule, LeafletModule,
+    NgxLeafletFullscreenModule, NgxLoadingControlModule,
+    NgxLeafletLocateModule, MatSlideToggleModule,
+    MatGridListModule, NgxSidebarControlModule, BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule {
+}
